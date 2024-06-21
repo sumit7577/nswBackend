@@ -14,6 +14,8 @@ class CustomUser(AbstractUser):
     objects = CustomManager()
 
 
+
+
 class Course(models.Model):
     name = models.CharField(max_length=50,blank=False,null=False)
     description = models.TextField(max_length=10000,blank=False,null=False)
@@ -26,6 +28,7 @@ class Course(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
 
 
 

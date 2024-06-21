@@ -26,10 +26,7 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
 class RegisterUserView(ModelViewSet):
     serializer_class = RegisterSerializer
     queryset = CustomUser.objects.all()
-
-    def perform_create(self, serializer):
-        return CustomUser.objects.create_user(**serializer.data)
-    
+ 
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
     
