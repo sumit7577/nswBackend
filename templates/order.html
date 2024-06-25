@@ -11,17 +11,17 @@
 <body>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
-        let image = "https://api.majoringlearn.com/Files/" + "{{ course.image }}"
+        let image = "http://127.0.0.1:8000/Files/" + "{{ course.image }}"
         var options = {
             "key": "{{ key }}",
             "amount": "{{order.amount}}", // amount in the smallest currency unit
             "currency": "INR",
-            "name": "{{ course.title }}",
-            "description": "By {{ course.instructor.username }}",
+            "name": "{{ course.name }}",
+            "description": "{{ course.description }}",
             "image": image,
             "order_id": "{{ order.id }}",
             "handler": function (response) {
-                fetch('https://api.majoringlearn.com/checkout/success/', {
+                fetch('http://127.0.0.1:8000/checkout/success/', {
                     method: "POST",
                     body: JSON.stringify({ id: "{{ id }}", payment_id: response.razorpay_payment_id, order_id: response.razorpay_order_id, signature: response.razorpay_signature }),
                     credentials: 'same-origin',
