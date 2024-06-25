@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.shortcuts import render
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet,ReadOnlyModelViewSet
 from app.models import *
 from app.serializers import *
 from rest_framework.authentication import TokenAuthentication,SessionAuthentication
@@ -30,6 +30,7 @@ class RegisterUserView(ModelViewSet):
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
     
+    
 
 class LoginView(APIView):
     """Login The User Using Auth Token"""
@@ -52,6 +53,43 @@ class LoginView(APIView):
     
 
 
+class CourseView(ModelViewSet):
+    pagination_class = AppPagination
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication,SessionAuthentication]
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
+
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
+
+
+class SingleCourseView(ReadOnlyModelViewSet):
+    serializer_class = CourseSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication,SessionAuthentication]
+
+    def get_queryset(self):
+        return Course.objects.filter(id=self.kwargs.get("pk"))
+    
+    def check_user(self,request,*args,**kwargs):
+        paid = False
+        course = Course.objects.prefetch_related("students").filter(students=request.user,id=kwargs.get("pk"))
+        if len(course) > 0:
+            self.serializer_class = SingleCourseSerializerPaid
+            paid = True
+        return paid
+
+    def retrieve(self, request, *args, **kwargs):
+        data  = self.check_user(request=request,*args,**kwargs)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        response = {"paid":data,"data":serializer.data}
+        return Response(response)
+    
+
+
 class Checkout(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication,SessionAuthentication]
@@ -65,6 +103,7 @@ class Checkout(APIView):
             return render(request=request,template_name="order.html",context=context)
         else:
             return Response({"success":False,"message":"Course Not Found!"},status=400)
+
 
 
 
@@ -87,6 +126,8 @@ class CheckoutSuccess(APIView):
                 return render(request=request,template_name="success.html")
         except Exception as e:
             return render(request=request,template_name="success.html")
+
+
 
 
 def check_signature(order_id:str,payment_id:str,signature:str):

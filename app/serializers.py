@@ -19,3 +19,16 @@ class RegisterSerializer(serializers.ModelSerializer):
 class AuthSerializer(serializers.Serializer):
     username = serializers.CharField(required=True, max_length=200)
     password = serializers.CharField(required=True, max_length=128)
+
+
+class SingleCourseSerializerPaid(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = "__all__"
+        depth=0
+
+
+class CourseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= Course
+        fields = ['id','name','image','description']
