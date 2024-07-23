@@ -22,7 +22,6 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
         Token.objects.create(user=instance)
 
 
-
 class RegisterUserView(ModelViewSet):
     serializer_class = RegisterSerializer
     queryset = CustomUser.objects.all()

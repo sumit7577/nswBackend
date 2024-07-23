@@ -14,23 +14,57 @@ class CustomUser(AbstractUser):
     objects = CustomManager()
 
 
+class Sessions(models.Model):
+    name = models.CharField(max_length=400,null=True,blank=True)
+    date = models.DateTimeField(default=timezone.now())
+    gdrive_link = models.CharField(max_length=1000,null=True,blank=True)
 
+    def __str__(self) -> str:
+        return self.gdrive_link
+
+BATCH_TYPE = (
+    ("Regular","Regular"),
+    ("Weekend","Weekend")
+)
 
 class Course(models.Model):
     name = models.CharField(max_length=50,blank=False,null=False)
+    batch_type = models.CharField(choices=BATCH_TYPE,max_length=30,null=False,blank=False)
     description = models.TextField(max_length=10000,blank=False,null=False)
-    students = models.ManyToManyField(to=CustomUser,related_name="students")
+    students = models.ManyToManyField(to=CustomUser,related_name="students",null=True,blank=True)
     starting_date = models.DateField(default=timezone.now())
+    ending_date = models.DateField(blank=False,null=False)
     teaching_time_start = models.DateTimeField(null=True,blank=True)
     teaching_time_end = models.DateTimeField(null=True,blank=True)
-    price = models.IntegerField(null=True,blank=True)
+    registration_fees = models.IntegerField(null=True,blank=True)
     image = models.ImageField(upload_to="course")
+    recording_sessions= models.ManyToManyField(to=Sessions,null=True,blank=True)
+    refunded = models.BooleanField(null=False,blank=False,default=False)
 
     def __str__(self) -> str:
         return self.name
 
+INSTALLMENT_CHOICES = (
+    ("1","1"),
+    ("2","2"),
+    ("3","3"),
+    ("4","4"),
+    ("5","5"),
+    ("6","6"),
+    ("7","7")
+)
 
+class Installment(models.Model):
+    course = models.ForeignKey(to=Course,blank=False,null=False,on_delete=models.CASCADE)
+    user  = models.ManyToManyField(to=CustomUser,blank=True,null=True)
+    date = models.DateTimeField(default=timezone.now())
+    price = models.IntegerField(null=True,blank=True)
+    installment_number = models.CharField(choices=INSTALLMENT_CHOICES,null=False,blank=False,max_length=100)
+    paid = models.BooleanField(default=False,null=False,blank=False)
 
+    def __str__(self) -> str:
+        return self.course.name
+    
 
 class Order(models.Model):
     keys = (("FAILED","FAILED"),

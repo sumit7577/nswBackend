@@ -11,7 +11,7 @@ class CustomUserAdmin(UserAdmin):
     fieldsets = (
         (None, {"fields": ("username", "password")}),
         (_("Personal info"), {
-         "fields": ("first_name", "last_name", "email","image")}),
+         "fields": ("first_name", "last_name", "email","image","phone")}),
         (
             _("Permissions"),
             {
@@ -27,6 +27,36 @@ class CustomUserAdmin(UserAdmin):
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
     )
 
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("username", "password1", "password2","image","email","phone"),
+            },
+        ),
+    )
+
+
+class CourseAdmin(admin.ModelAdmin):
+    list_display = ('name', 'batch_type', 'starting_date', 'ending_date', 'registration_fees', 'display_students')
+    
+    def display_students(self, obj):
+        return ", ".join([student.username for student in obj.students.all()])
+    
+    display_students.short_description = 'Students'
+
+
+class InstallmentAdmin(admin.ModelAdmin):
+    list_display = ('installment_number','course','date','price','display_students')
+    
+    def display_students(self, obj):
+        return ", ".join([student.username for student in obj.user.all()])
+    
+    display_students.short_description = 'Students'
+
 admin.site.register(CustomUser,CustomUserAdmin)
-admin.site.register(Course)
+admin.site.register(Course,CourseAdmin)
 admin.site.register(Order)
+admin.site.register(Installment,InstallmentAdmin)
+admin.site.register(Sessions)
