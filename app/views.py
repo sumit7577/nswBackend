@@ -14,6 +14,10 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.hashers import check_password
 import razorpay
 from app.paginator import AppPagination
+from rest_framework import status
+from django.contrib.auth.password_validation import validate_password
+from rest_framework.generics import CreateAPIView
+
 
 # Create your views here.
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
@@ -22,15 +26,52 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
         Token.objects.create(user=instance)
 
 
-class RegisterUserView(ModelViewSet):
-    serializer_class = RegisterSerializer
-    queryset = CustomUser.objects.all()
- 
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
-    
-    
 
+class RegisterUserView(CreateAPIView):
+      serializer_class = RegisterUserSerializer
+
+      def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()  # Save the validated data (creates Otp and sends email)
+            return Response({"status": True, "message": "OTP sent to your email."}, status=status.HTTP_201_CREATED)
+        
+        return Response({"status": False, "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class OtpVerifyView(CreateAPIView):
+    serializer_class = OtpSerializer
+
+    def create(self, request, *args, **kwargs):
+        # Initialize the serializer with the request data
+        serializer = self.get_serializer(data=request.data)
+        
+        # Validate the serializer
+        if not serializer.is_valid():
+            return Response({"status": False, "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        
+        otp_value = serializer.validated_data.get("otp")
+        
+        try:
+            otp_instance = Otp.objects.filter(otp=otp_value).latest('created_at')
+        except Otp.DoesNotExist:
+            return Response({"status": False, "errors": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Create the user
+        user = CustomUser.objects.create_user(
+            email=otp_instance.email,
+            password=otp_instance.password,  # Ensure this is already hashed
+            phone=otp_instance.phone
+        )
+        user_data = UserDetailSerialzer(user)
+        token, _ = Token.objects.get_or_create(user=user)
+        
+        # Optionally delete the OTP instance or mark it as used
+        otp_instance.delete()
+        
+        return Response({"status": True, "message": user_data.data,"token":token.key}, status=status.HTTP_201_CREATED)
+
+    
 class LoginView(APIView):
     """Login The User Using Auth Token"""
     def post(self, request):

@@ -3,16 +3,55 @@ from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser,AbstractUser
 from django.utils.translation import gettext_lazy as _
 from app.manager import CustomManager
+from django.contrib.auth.validators import UnicodeUsernameValidator
+from app.utils import *
+import pyotp
 
+
+totp = pyotp.TOTP('veryhardpass',interval=60)
 
 
 # Create your models here.
 class CustomUser(AbstractUser):
+    username_validator = UnicodeUsernameValidator()
+    username = models.CharField(
+        _("username"),
+        max_length=150,
+        unique=True,
+        help_text=_(
+            "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
+        ),
+        validators=[username_validator],
+        error_messages={
+            "unique": _("A user with that username already exists."),
+        },
+        blank=True
+    )
     image = models.ImageField(upload_to="people",null=True,blank=True)
-    email = models.EmailField(_("email address"), blank=False,unique=True,null=False)
-    phone = models.CharField(max_length=10,blank=False,null=False,unique=True)
+
+    email = models.EmailField(_("email address"), blank=False,
+                              unique=True,null=False)
+
+    phone = models.CharField(max_length=10,blank=False,
+                             null=False,
+                             unique=True)
+    
+    USERNAME_FIELD = "username"
+    REQUIRED_FIELDS = ["email"]
     objects = CustomManager()
 
+class Otp(models.Model):
+    otp = models.CharField(blank=False,null=False,max_length=6,unique=True)
+    email = models.EmailField(_('email address'))
+    phone = models.CharField(max_length=20)
+    password = models.CharField(_("password"), max_length=128)
+    created_at = models.DateTimeField(default=timezone.now())
+
+    class Meta:
+        get_latest_by = "id"
+
+    def __str__(self):
+        return self.otp
 
 class Sessions(models.Model):
     name = models.CharField(max_length=400,null=True,blank=True)

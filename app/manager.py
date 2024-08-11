@@ -4,17 +4,28 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.apps import apps
 from django.contrib.auth.hashers import make_password
 from django.contrib import auth
+from app.utils import *
+from django.utils.translation import gettext_lazy as _
 
 class CustomManager(BaseUserManager):
     use_in_migrations = True
 
-    def _create_user(self, username, email, password, **extra_fields):
+    def generate_random_username(self):
+        """
+        Generate a unique random username.
+        """
+        while True:
+            username = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+            if not self.model.objects.filter(username=username).exists():
+                return username
+            
+
+    def _create_user(self, email=None, password=None, username=None, **extra_fields):
         """
         Create and save a user with the given username, email, and password.
         """
-            
         if not username:
-            raise ValueError("The given username must be set")
+            username = email.split("@")[0]+"_"+self.generate_random_username()
         
         email = self.normalize_email(email)
         # Lookup the real model class from the global app registry so this
@@ -29,10 +40,10 @@ class CustomManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_user(self, username, email=None, password=None, **extra_fields):
+    def create_user(self, username=None, email=None, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", False)
         extra_fields.setdefault("is_superuser", False)
-        return self._create_user(username, email, password, **extra_fields)
+        return self._create_user(email, password, username, **extra_fields)
 
     def create_superuser(self, username, email=None, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
@@ -42,8 +53,9 @@ class CustomManager(BaseUserManager):
             raise ValueError("Superuser must have is_staff=True.")
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
-
-        return self._create_user(username, email, password, **extra_fields)
+        
+        extra_fields.setdefault("phone",9117517982)
+        return self._create_user(email,password,username, **extra_fields)
 
     def with_perm(
         self, perm, is_active=True, include_superusers=True, backend=None, obj=None
