@@ -147,7 +147,7 @@ class Checkout(APIView):
             client = razorpay.Client(auth=(settings.RAZORPAY_API_KEY, settings.RAZORPAY_API_SECRET))
             order = client.order.create({'amount': course[0].registration_fees*100, 'currency': 'INR'})
             local_order = Order.objects.create(course=course[0],user=request.user,order_data=order)
-            context = {"key":settings.RAZORPAY_API_KEY,"order":order,"course":course[0],"id":local_order.id}
+            context = {"key":settings.RAZORPAY_API_KEY,"order":order,"course":course[0],"id":local_order.id,"host": request.get_host()  }
             return render(request=request,template_name="order.html",context=context)
         else:
             return Response({"success":False,"message":"Course Not Found!"},status=400)
