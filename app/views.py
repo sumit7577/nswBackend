@@ -69,7 +69,7 @@ class OtpVerifyView(CreateAPIView):
         # Optionally delete the OTP instance or mark it as used
         otp_instance.delete()
         
-        return Response({"status": True, "message": user_data.data,"token":token.key}, status=status.HTTP_201_CREATED)
+        return Response({"status": True, "user": user_data.data,"token":token.key}, status=status.HTTP_201_CREATED)
 
     
 class LoginView(APIView):

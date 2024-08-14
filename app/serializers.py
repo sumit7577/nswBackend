@@ -78,4 +78,4 @@ class SingleCourseSerializerPaid(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model= Course
-        fields = ['id','name','image','description']
+        fields = ['id','name','image','description','content']

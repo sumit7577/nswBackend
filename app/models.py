@@ -69,7 +69,8 @@ BATCH_TYPE = (
 class Course(models.Model):
     name = models.CharField(max_length=50,blank=False,null=False)
     batch_type = models.CharField(choices=BATCH_TYPE,max_length=30,null=False,blank=False)
-    description = models.TextField(max_length=10000,blank=False,null=False)
+    description = models.TextField(max_length=1000,blank=False,null=False)
+    content = models.TextField(max_length=10000,blank=False,null=False,default="")
     students = models.ManyToManyField(to=CustomUser,related_name="students",null=True,blank=True)
     starting_date = models.DateField(default=timezone.now())
     ending_date = models.DateField(blank=False,null=False)
