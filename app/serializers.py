@@ -78,4 +78,17 @@ class SingleCourseSerializerPaid(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model= Course
-        fields = ['id','name','image','description','content']
+        fields = ['id','name','image','description','content','starting_date','ending_date','teaching_time_start','teaching_time_end','registration_fees']
+
+
+class PaidInstallmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Installment
+        fields = "__all__"
+        depth = 0
+
+
+class InstallmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Installment
+        fields = ['id','installment_number','date','price']

@@ -120,12 +120,20 @@ class SingleCourseView(ReadOnlyModelViewSet):
             self.serializer_class = SingleCourseSerializerPaid
             paid = True
         return paid
+    
+    def getInstallment(self,paid:bool):
+        data = Installment.objects.filter(course= self.kwargs.get("pk"))
+        serialized_data = InstallmentSerializer(data,many=True)
+        if paid:
+            serialized_data = PaidInstallmentSerializer(data,many=True)
+        return serialized_data.data
 
     def retrieve(self, request, *args, **kwargs):
         data  = self.check_user(request=request,*args,**kwargs)
+        installment = self.getInstallment(data)
         instance = self.get_object()
         serializer = self.get_serializer(instance)
-        response = {"paid":data,"data":serializer.data}
+        response = {"paid":data,"data":serializer.data,'installment':installment}
         return Response(response)
     
 
@@ -137,7 +145,7 @@ class Checkout(APIView):
         course = Course.objects.filter(id=pk)
         if len(course) > 0:
             client = razorpay.Client(auth=(settings.RAZORPAY_API_KEY, settings.RAZORPAY_API_SECRET))
-            order = client.order.create({'amount': course[0].price*100, 'currency': 'INR'})
+            order = client.order.create({'amount': course[0].registration_fees*100, 'currency': 'INR'})
             local_order = Order.objects.create(course=course[0],user=request.user,order_data=order)
             context = {"key":settings.RAZORPAY_API_KEY,"order":order,"course":course[0],"id":local_order.id}
             return render(request=request,template_name="order.html",context=context)
