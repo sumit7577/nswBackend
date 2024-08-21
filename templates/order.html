@@ -11,17 +11,17 @@
 <body>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
-        let image = "https://{{ host }}/Files/" + "{{ course.image }}"
+        let image = "http://{{ host }}/Files/" + "{{ course.image }}"
         var options = {
             "key": "{{ key }}",
             "amount": "{{order.amount}}", // amount in the smallest currency unit
             "currency": "INR",
             "name": "{{ course.name }}",
-            "description": "{{ course.description }}",
+            "description": "{{ course.description }}".slice(0,240),
             "image": image,
             "order_id": "{{ order.id }}",
             "handler": function (response) {
-                fetch('https://{{ host }}/checkout/success/', {
+                fetch('http://{{ host }}/checkout/success/', {
                     method: "POST",
                     body: JSON.stringify({ id: "{{ id }}", payment_id: response.razorpay_payment_id, order_id: response.razorpay_order_id, signature: response.razorpay_signature }),
                     credentials: 'same-origin',
@@ -30,10 +30,15 @@
                         'Content-Type': 'application/json',
                         'X-CSRFToken': '{{ csrf_token }}'
                     },
-                }).then((data) => {
-                    setTimeout(() => {
-                        window.parent.location.reload()
-                    }, 1000)
+                }).then(response => response.json())
+                .then((data) => {
+                    if(window.ReactNativeWebView){
+                        window.ReactNativeWebView.postMessage(data)
+                    }
+                    else{
+                        console.log(data)
+                    }
+                    
                 }).catch((error) => {
                     alert("Sorry! we cant proccess your payment now!")
                     setTimeout(() => {

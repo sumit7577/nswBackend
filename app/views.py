@@ -143,6 +143,9 @@ class Checkout(APIView):
     authentication_classes = [TokenAuthentication,SessionAuthentication]
     def get(self,request,pk):
         course = Course.objects.filter(id=pk)
+        userRegistered = Course.objects.filter(id=pk,students=request.user.id)
+        if len(userRegistered) > 0:
+            return Response({"success":False,"message":"Course Already Purchased!"},status=400)
         if len(course) > 0:
             client = razorpay.Client(auth=(settings.RAZORPAY_API_KEY, settings.RAZORPAY_API_SECRET))
             order = client.order.create({'amount': course[0].registration_fees*100, 'currency': 'INR'})
@@ -169,11 +172,11 @@ class CheckoutSuccess(APIView):
                 order.order_id = order_id
                 order.signature = signature
                 order.save()
-                course = Course.objects.get(id=order.course.id).students.add(order.user)
-                course.save()
-                return render(request=request,template_name="success.html")
+                Course.objects.get(id=order.course.id).students.add(order.user)
+                return Response({"success": True, "message": "Payment Completed Succesfull!"}, status=200)
         except Exception as e:
-            return render(request=request,template_name="success.html")
+            print(e)
+            return Response({"success": False, "message": "Payment Not Completed!"}, status=400)
 
 
 
