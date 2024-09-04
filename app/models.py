@@ -39,6 +39,7 @@ class CustomUser(AbstractUser):
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["email"]
     objects = CustomManager()
+    
 
 class Otp(models.Model):
     otp = models.CharField(blank=False,null=False,max_length=6,unique=True)
@@ -63,21 +64,30 @@ class Sessions(models.Model):
 
 BATCH_TYPE = (
     ("Regular","Regular"),
-    ("Weekend","Weekend")
+    ("Weekend","Weekend"),
+    ("Intern","Intern"),
+    ("Cross-Spilling","Cross-Spilling"),
+    ("Others","Others")
+)
+
+COURSE_MODE = (
+    ("Online","Online"),
+    ("Offline","Offline")
 )
 
 class Course(models.Model):
-    name = models.CharField(max_length=50,blank=False,null=False)
+    name = models.CharField(_("Course Name"),max_length=50,blank=False,null=False,)
     batch_type = models.CharField(choices=BATCH_TYPE,max_length=30,null=False,blank=False)
-    description = models.TextField(max_length=1000,blank=False,null=False)
-    content = models.TextField(max_length=10000,blank=False,null=False,default="")
+    course_mode = models.CharField(choices=COURSE_MODE,blank=True,max_length=20)
+    description = models.TextField(_("Who Can Enroll this Course?"),max_length=1000,blank=False,null=False)
+    content = models.TextField(_("Course Content"),max_length=10000,blank=False,null=False,default="")
     students = models.ManyToManyField(to=CustomUser,related_name="students",null=True,blank=True)
     starting_date = models.DateField(default=timezone.now())
     ending_date = models.DateField(blank=False,null=False)
-    teaching_time_start = models.DateTimeField(null=True,blank=True)
-    teaching_time_end = models.DateTimeField(null=True,blank=True)
-    registration_fees = models.IntegerField(null=True,blank=True)
-    image = models.ImageField(upload_to="course")
+    teaching_time_start = models.TimeField(_("Session Time Start"),null=True,blank=True)
+    teaching_time_end = models.TimeField(_("Session Time End"),null=True,blank=True)
+    registration_fees = models.IntegerField(_("Course Registration fees"),null=True,blank=True)
+    image = models.ImageField(upload_to="course",null=True,blank=True)
     recording_sessions= models.ManyToManyField(to=Sessions,null=True,blank=True)
     refunded = models.BooleanField(null=False,blank=False,default=False)
 
@@ -95,10 +105,10 @@ INSTALLMENT_CHOICES = (
 )
 
 class Installment(models.Model):
-    course = models.ForeignKey(to=Course,blank=False,null=False,on_delete=models.CASCADE)
+    course = models.ForeignKey(to=Course,verbose_name=_("Course Name"),blank=False,null=False,on_delete=models.CASCADE)
     user  = models.ManyToManyField(to=CustomUser,blank=True,null=True)
-    date = models.DateTimeField(default=timezone.now())
-    price = models.IntegerField(null=True,blank=True)
+    due_date = models.DateField(_("Installment Due Date"),default=timezone.now())
+    price = models.IntegerField(_("Installment Amount"),null=True,blank=True)
     installment_number = models.CharField(choices=INSTALLMENT_CHOICES,null=False,blank=False,max_length=100)
     paid = models.BooleanField(default=False,null=False,blank=False)
 

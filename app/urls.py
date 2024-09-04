@@ -9,5 +9,6 @@ urlpatterns = [
     path("courses/",CourseView.as_view({"get":"list"})),
     path("courses/<pk>",SingleCourseView.as_view({"get":"retrieve"})),
     path("checkout/<pk>",Checkout.as_view()),
-    path("checkout/success/",CheckoutSuccess.as_view(),name="success")
+    path("checkout/success/",CheckoutSuccess.as_view(),name="success"),
+    path("orders/",Orders.as_view({"get":"list"}),name="orders")
 ]

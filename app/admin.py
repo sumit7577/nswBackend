@@ -48,7 +48,7 @@ class CourseAdmin(admin.ModelAdmin):
 
 
 class InstallmentAdmin(admin.ModelAdmin):
-    list_display = ('installment_number','course','date','price','display_students')
+    list_display = ('installment_number','course','due_date','price','display_students')
     
     def display_students(self, obj):
         return ", ".join([student.username for student in obj.user.all()])

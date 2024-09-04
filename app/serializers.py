@@ -92,3 +92,11 @@ class InstallmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Installment
         fields = ['id','installment_number','date','price']
+
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    course = CourseSerializer()
+    class Meta:
+        model = Order
+        fields = ["id","order_data","status","payment_id","order_id","course"]
