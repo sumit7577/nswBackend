@@ -123,6 +123,7 @@ class Order(models.Model):
     course = models.ForeignKey(to=Course,blank=False,null=False,on_delete=models.CASCADE)
     user  = models.ForeignKey(to=CustomUser,blank=False,null=False,on_delete=models.CASCADE)
     order_data = models.JSONField(blank=False,null=False)
+    order_date = models.DateField(null=False,blank=False,default=timezone.now())
     status = models.CharField(choices=keys,null=False,blank=False,max_length=100,default="PENDING")
     payment_id = models.CharField(null=True,blank=True,max_length=200)
     order_id = models.CharField(null=True,blank=True,max_length=200)
