@@ -99,4 +99,4 @@ class OrderSerializer(serializers.ModelSerializer):
     course = CourseSerializer()
     class Meta:
         model = Order
-        fields = ["id","order_data","status","payment_id","order_id","course"]
+        fields = ["id","order_data","status","payment_id","order_id","course","order_date"]
