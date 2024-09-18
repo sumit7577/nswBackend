@@ -6,7 +6,7 @@ from app.models import *
 
 # Register your models here.
 class CustomUserAdmin(UserAdmin):
-    list_display = ("username", "email",
+    list_display = ("id","username", "email",
                     "first_name", "last_name", "is_staff")
     fieldsets = (
         (None, {"fields": ("username", "password")}),

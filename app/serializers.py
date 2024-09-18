@@ -15,6 +15,12 @@ class UserDetailSerialzer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class UpdateUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields= ["username","image"]
+
+
 class OtpSerializer(serializers.Serializer):
     otp = serializers.CharField(max_length=6)
 

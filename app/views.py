@@ -16,7 +16,8 @@ import razorpay
 from app.paginator import AppPagination
 from rest_framework import status
 from django.contrib.auth.password_validation import validate_password
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView,UpdateAPIView,GenericAPIView
+from rest_framework.parsers import MultiPartParser
 
 
 # Create your views here.
@@ -198,3 +199,29 @@ class Orders(ReadOnlyModelViewSet):
     
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+
+
+class UpdateOwnProfile(GenericAPIView):
+    serializer_class = UpdateUserSerializer
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser]
+
+    def get_object(self):
+        # Return the currently authenticated user
+        return self.request.user
+
+    def patch(self, request, *args, **kwargs):
+        # Get the current user object
+        user = self.get_object()
+
+        # Pass the request data to the serializer
+        serializer = self.get_serializer(user, data=request.data, partial=True)
+
+        # Check if the data is valid
+        if serializer.is_valid():
+            serializer.save()  # Save the updated data
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
