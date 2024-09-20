@@ -222,6 +222,6 @@ class UpdateOwnProfile(GenericAPIView):
         # Check if the data is valid
         if serializer.is_valid():
             serializer.save()  # Save the updated data
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({"status":True,"data":serializer.data}, status=status.HTTP_200_OK)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"status":False,"errors":serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
