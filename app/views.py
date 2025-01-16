@@ -225,3 +225,8 @@ class UpdateOwnProfile(GenericAPIView):
             return Response({"status":True,"data":serializer.data}, status=status.HTTP_200_OK)
         else:
             return Response({"status":False,"errors":serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            
+
+class InvoiceMail(APIView):
+    def get(self,request):
+        return render(request=request,template_name="invoice/invoice_template.html")

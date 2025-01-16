@@ -97,7 +97,7 @@ class PaidInstallmentSerializer(serializers.ModelSerializer):
 class InstallmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Installment
-        fields = ['id','installment_number','date','price']
+        fields = ['id','installment_number','due_date','price']
 
 
 
